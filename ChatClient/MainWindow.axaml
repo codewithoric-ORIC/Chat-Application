@@ -1,0 +1,93 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ChatClient"
+        x:DataType="local:MainWindow"
+        x:Class="ChatClient.MainWindow"
+        Title="Teacher-Student Messenger" Width="600" Height="600"
+        Background="#F5F7F8" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <local:StatusColorConverter x:Key="StatusColorConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Border Name="LoginContainer" Background="White" CornerRadius="15" Margin="40"
+                Padding="30" VerticalAlignment="Center" BoxShadow="0 4 20 0 #20000000">
+            
+            <StackPanel Name="LoginSection" Spacing="15">
+                <TextBlock Name="TitleText" Text="Login" FontSize="24" FontWeight="Bold" 
+                           HorizontalAlignment="Center" Foreground="#2C3E50"/>
+                
+                <TextBox Name="UserNameInput" Watermark="Username" Height="40" CornerRadius="8"/>
+                <TextBox Name="PassEntry" Watermark="Password" PasswordChar="*" Height="40" CornerRadius="8"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                    <RadioButton Name="TeacherRole" Content="Teacher" IsChecked="True" Checked="OnRoleChanged"/>
+                    <RadioButton Name="StudentRole" Content="Student" Checked="OnRoleChanged"/>
+                </StackPanel>
+
+                <TextBox Name="TeacherCodeInput" Watermark="Enter Teacher Security Key"
+                         PasswordChar="*" Height="40" IsVisible="True"/>
+
+                <Button Name="SubmitButton" Content="Connect to Chat" Click="OnLoginClick" Height="45"
+                        Background="#3498DB" Foreground="White" CornerRadius="8"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                
+                <Button Name="ToggleModeButton" Content="Don't have an account? Register" 
+                        Click="OnToggleModeClick" Background="Transparent" Foreground="#3498DB" 
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Name="ChatSection" IsVisible="False" ColumnDefinitions="180,*" RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#3498DB" Height="60">
+                <TextBlock Name="UserWelcomeText" Foreground="White" VerticalAlignment="Center" 
+                           FontWeight="Bold" Margin="15,0" FontSize="16"/>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="0" Background="#ECEFF1" BorderBrush="#CFD8DC" BorderThickness="0,0,1,0">
+                <StackPanel>
+                    <TextBlock Text="Online Users" Margin="10" FontWeight="Bold" Foreground="#34495E"/>
+                    <ListBox Name="UserList" Background="Transparent" SelectionChanged="OnUserSelected">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="local:UserStatusItem">
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <Ellipse Width="10" Height="10" 
+                                            Fill="{Binding IsOnline, Converter={StaticResource StatusColorConverter}}" 
+                                            Margin="5,0"/>
+                                    <TextBlock Text="{Binding UserName}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,Auto">
+                <ListBox Name="ChatDisplayList" Grid.Row="0" Background="#FDFDFD" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:ChatMessage">
+                            <StackPanel HorizontalAlignment="{Binding Alignment}" Margin="{Binding Margin}">
+                                <TextBlock Text="{Binding Sender}" FontSize="10" Foreground="#7F8C8D"/>
+                                <Border CornerRadius="12" Padding="12,8" Background="{Binding BubbleColor}">
+                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" MaxWidth="280"/>
+                                </Border>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="1" Background="White" BorderBrush="#ECF0F1" BorderThickness="0,1,0,0" Padding="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Name="MessageInput" Grid.Column="0" Watermark="Type your message here..." 
+                                 BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"/>
+                        <Button Name="SendButton" Grid.Column="1" Content="Send" Click="OnSendClick" 
+                                Background="#2ECC71" Foreground="White" Width="70" Height="35"
+                                CornerRadius="5" HorizontalContentAlignment="Center"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+        
+    </Grid>
+</Window>
