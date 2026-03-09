@@ -88,3 +88,4 @@
 /Users/mac/Desktop/ChatApplication/ChatClient/obj/Debug/net10.0/ChatClient.csproj.Up2Date
 /Users/mac/Desktop/ChatApplication/ChatClient/obj/Debug/net10.0/ChatClient.genruntimeconfig.cache
 /Users/mac/Desktop/ChatApplication/ChatClient/obj/Debug/net10.0/ref/ChatClient.dll
+/Users/mac/Desktop/ChatApplication/ChatClient/obj/Debug/net10.0/ChatClient.sourcelink.json

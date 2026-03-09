@@ -48,3 +48,4 @@
 /Users/mac/Desktop/ChatApplication/ChatServer/obj/Debug/net10.0/ChatServer.pdb
 /Users/mac/Desktop/ChatApplication/ChatServer/obj/Debug/net10.0/ChatServer.genruntimeconfig.cache
 /Users/mac/Desktop/ChatApplication/ChatServer/obj/Debug/net10.0/ref/ChatServer.dll
+/Users/mac/Desktop/ChatApplication/ChatServer/obj/Debug/net10.0/ChatServer.sourcelink.json
