@@ -1240,11 +1240,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/mac/Desktop/ChatApplication/ChatServer/ChatServer.csproj",
+      "projectUniqueName": "/Users/mac/Desktop/Chat-Application/ChatServer/ChatServer.csproj",
       "projectName": "ChatServer",
-      "projectPath": "/Users/mac/Desktop/ChatApplication/ChatServer/ChatServer.csproj",
+      "projectPath": "/Users/mac/Desktop/Chat-Application/ChatServer/ChatServer.csproj",
       "packagesPath": "/Users/mac/.nuget/packages/",
-      "outputPath": "/Users/mac/Desktop/ChatApplication/ChatServer/obj/",
+      "outputPath": "/Users/mac/Desktop/Chat-Application/ChatServer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/mac/.nuget/NuGet/NuGet.Config"

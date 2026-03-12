@@ -11,10 +11,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.IO;
+using ChatClient.Models;
 using Avalonia.Data.Converters;
 using System.Globalization;
 
-namespace ChatClient;
+namespace ChatClient.Views;
 
 // partial keyword က အရေးကြီးပါတယ်။ UI နဲ့ ချိတ်ပေးတာပါ။
 public partial class MainWindow : Window
@@ -28,17 +29,17 @@ public partial class MainWindow : Window
     // private ObservableCollection<string> _onlineUsers = new ObservableCollection<string>();
     private ObservableCollection<ChatMessage> _chatMessages = new ObservableCollection<ChatMessage>();
     private ObservableCollection<UserStatusItem> _onlineUsers = new ObservableCollection<UserStatusItem>();
-    private TcpClient? client;           
-    private NetworkStream? clientStream; 
+    private TcpClient? client;
+    private NetworkStream? clientStream;
 
     public MainWindow()
     {
         InitializeComponent();
-        
+
         // UI Components တွေနဲ့ Data ချိတ်ဆက်ခြင်း
         UserList.ItemsSource = _onlineUsers;
-        ChatDisplayList.ItemsSource = _chatMessages; 
-        
+        ChatDisplayList.ItemsSource = _chatMessages;
+
         _onlineUsers.Add(new UserStatusItem { UserName = "All", IsOnline = true });
     }
 
@@ -54,7 +55,6 @@ public partial class MainWindow : Window
         isRegisterMode = !isRegisterMode;
         TitleText.Text = isRegisterMode ? "Register" : "Login";
         SubmitButton.Content = isRegisterMode ? "Register" : "Login";
-        ToggleModeButton.Content = isRegisterMode ? "Already have an account? Login" : "Don't have an account? Register";
     }
 
     // မှတ်ချက်- InitializeComponent() ကို လက်နဲ့ ထပ်ရေးစရာ မလိုပါဘူး။
@@ -70,11 +70,11 @@ public partial class MainWindow : Window
                 Message = text,
                 Time = DateTime.Now.ToString("HH:mm"),
                 // UI အတွက် လိုအပ်သော Property များ
-                Alignment = isMine ? "Right" : "Left",
+                Alignment = isMine ? HorizontalAlignment.Right : HorizontalAlignment.Left,
                 BubbleColor = isMine ? "#DCF8C6" : "#FFFFFF",
                 Margin = isMine ? new Thickness(50, 5, 0, 5) : new Thickness(0, 5, 50, 5)
             });
-        
+
             // Scroll လုပ်ခြင်း
             ChatDisplayList.ScrollIntoView(_chatMessages[_chatMessages.Count - 1]);
         });
@@ -116,7 +116,7 @@ public partial class MainWindow : Window
         ConnectToServer();
     }
 
-    private void ConnectToServer() 
+    private void ConnectToServer()
     {
         try
         {
@@ -131,7 +131,7 @@ public partial class MainWindow : Window
             Thread listenerThread = new Thread(ReceiveMessages); // ListenForMessages အစား ReceiveMessages သုံးပါ
             listenerThread.IsBackground = true;
             listenerThread.Start();
-            
+
             Console.WriteLine("Connected to server!");
         }
         catch (Exception ex)
@@ -141,71 +141,108 @@ public partial class MainWindow : Window
     }
 
     private void ListenForMessages()
+    {
+        byte[] buffer = new byte[1024];
+        while (clientStream != null && clientStream.CanRead)
         {
-            byte[] buffer = new byte[1024];
-            while (clientStream != null && clientStream.CanRead)
+            try
             {
-                try
-                {
-                    int bytesRead = clientStream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead == 0) break;
-                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                int bytesRead = clientStream.Read(buffer, 0, buffer.Length);
+                if (bytesRead == 0) break;
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-                    // UI ပေါ်မှာ ပြဖို့ Dispatcher သုံးပါ
-                    Dispatcher.UIThread.InvokeAsync(() => {
-                        // ဤနေရာတွင် UserList သို့မဟုတ် Message ကို UI ထဲထည့်ပါ
-                        Console.WriteLine("Received: " + message);
-                    });
-                }
-                catch { break; }
+                // UI ပေါ်မှာ ပြဖို့ Dispatcher သုံးပါ
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    // ဤနေရာတွင် UserList သို့မဟုတ် Message ကို UI ထဲထည့်ပါ
+                    Console.WriteLine("Received: " + message);
+                });
             }
+            catch { break; }
         }
+    }
 
     private void ReceiveMessages()
     {
         try
         {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096]; // Buffer size ကို အနည်းငယ်တိုးထားပါ
+            string incompleteMessage = "";  // အပိုင်းပိုင်းရောက်လာတဲ့စာကို စုထားဖို့
+
             while (_isListening && _stream != null)
             {
                 int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                if (bytesRead > 0)
+                if (bytesRead <= 0) break; // Connection ပြတ်သွားရင် ရပ်ပါ
+
+                string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                incompleteMessage += receivedData;
+
+                // Server က စာတိုင်းကို \n နဲ့ အဆုံးသတ်ပြီး ပို့တယ်လို့ ယူဆပါတယ်
+                while (incompleteMessage.Contains("\n"))
                 {
-                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    int newlineIndex = incompleteMessage.IndexOf("\n");
+                    string completeMessage = incompleteMessage.Substring(0, newlineIndex).Trim();
+                    incompleteMessage = incompleteMessage.Substring(newlineIndex + 1);
+
+                    if (string.IsNullOrEmpty(completeMessage)) continue;
 
                     Dispatcher.UIThread.Post(() =>
                     {
-                        if (message.Contains("USERLIST|"))
+                        Console.WriteLine($"Processing: {completeMessage}");
+
+                        if (completeMessage.StartsWith("USERLIST|"))
                         {
-                            UpdateUserList(message);
+                            UpdateUserList(completeMessage);
                         }
                         else
                         {
-                            var parts = message.Split(':', 2);
-                            if (parts.Length == 2)
-                                AddMessage(parts[0].Trim(), parts[1].Trim(), false);
+                            // လက်ခံရရှိတဲ့ စာသား (ဥပမာ: "Su Su: Hi")
+                            string msg = completeMessage.Trim();
+                            
+                            // အခြေအနေ ၁: Format မှန်လျှင် (Target|Sender|Message)
+                            if (msg.Contains("|"))
+                            {
+                                var parts = msg.Split('|');
+                                if (parts.Length >= 3)
+                                    AddMessage(parts[1], parts[2], false);
+                            }
+                            // အခြေအနေ ၂: Format ":" နဲ့လာလျှင် (ဥပမာ: "Su Su: Hi")
+                            else if (msg.Contains(":"))
+                            {
+                                int colonIndex = msg.IndexOf(":");
+                                string sender = msg.Substring(0, colonIndex).Trim();
+                                string text = msg.Substring(colonIndex + 1).Trim();
+                                AddMessage(sender, text, false);
+                            }
+                            // အခြေအနေ ၃: Format မပါလျှင် (Server စာသားသက်သက်)
                             else
-                                AddMessage("Server", message, false);
+                            {
+                                AddMessage("System", msg, false);
+                            }
                         }
                     });
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Receive Error: " + ex.Message);
+        }
     }
 
     private void UpdateUserList(string message)
     {
         // USERLIST|Name1:True,Name2:False ပုံစံဖြင့် ရောက်လာသည်ဟု ယူဆပါသည်
         int index = message.IndexOf("USERLIST|");
-        if (index == -1) return; 
+        if (index == -1) return;
 
         string listPart = message.Substring(index).Split('\n')[0].Replace("USERLIST|", "");
         string[] userEntries = listPart.Split(',');
 
-        Dispatcher.UIThread.InvokeAsync(() => {
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
             _onlineUsers.Clear();
-            
+
             // "All" ကို Object အနေဖြင့် ထည့်ပါ
             _onlineUsers.Add(new UserStatusItem { UserName = "All", IsOnline = true });
 
@@ -228,22 +265,22 @@ public partial class MainWindow : Window
 
     public void OnUserSelected(object sender, SelectionChangedEventArgs e)
     {
-        if (UserList.SelectedItem != null)
+        if (UserList.SelectedItem is UserStatusItem selectedUser)
         {
-            _targetUser = UserList.SelectedItem.ToString() ?? "All";
+            _targetUser = selectedUser.UserName; // Object အစစ်ကနေ နာမည်ကို ယူပါ
+            Console.WriteLine("Target changed to: " + _targetUser);
         }
     }
 
     public void OnSendClick(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrEmpty(MessageInput.Text))
+        if (!string.IsNullOrWhiteSpace(MessageInput.Text))
         {
+            // ဥပမာ - All|YourName|Hello
             string formattedMessage = $"{_targetUser}|{_userName}|{MessageInput.Text}";
             SendMessage(formattedMessage);
 
-            string targetDisplay = (_targetUser == "All") ? "Everyone" : _targetUser;
-            AddMessage($"Me (to {targetDisplay})", MessageInput.Text, true);
-
+            AddMessage("Me", MessageInput.Text, true);
             MessageInput.Text = "";
         }
     }
@@ -254,33 +291,17 @@ public partial class MainWindow : Window
         {
             if (clientStream != null && clientStream.CanWrite)
             {
-                byte[] data = Encoding.UTF8.GetBytes(message);
+                // ဒီနေရာမှာ + "\n" ထည့်ပေးလိုက်ပါ
+                byte[] data = Encoding.UTF8.GetBytes(message + "\n");
                 clientStream.Write(data, 0, data.Length);
-            }
-            else
-            {
-                // Server ပြတ်သွားရင် UI မှာ ပြပေးပါ
-                Dispatcher.UIThread.InvokeAsync(() => {
-                    // ဥပမာ - User ကို Server ပြတ်နေကြောင်း Notification ပေးပါ
-                });
+                clientStream.Flush();
             }
         }
-        catch (IOException)
+        catch (Exception ex)
         {
-            // Broken pipe ဆိုတာ ဒီနေရာမှာ ဖမ်းမိပါလိမ့်မယ်
-            Console.WriteLine("Connection to server was lost.");
+            Console.WriteLine("Send Error: " + ex.Message);
         }
     }
+    
 }
 
- // Chat Bubble အတွက် လိုအပ်သော Data Class
-    // Message Model
-    public class ChatMessage
-    {
-        public string Sender { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-        public string Time { get; set; } = string.Empty;
-        public string Alignment { get; set; } = "Left";
-        public string BubbleColor { get; set; } = "#FFFFFF";
-        public Thickness Margin { get; set; }
-    }

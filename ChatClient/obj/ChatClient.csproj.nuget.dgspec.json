@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mac/Desktop/ChatApplication/ChatClient/ChatClient.csproj": {}
+    "/Users/mac/Desktop/Chat-Application/ChatClient/ChatClient.csproj": {}
   },
   "projects": {
-    "/Users/mac/Desktop/ChatApplication/ChatClient/ChatClient.csproj": {
+    "/Users/mac/Desktop/Chat-Application/ChatClient/ChatClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/Desktop/ChatApplication/ChatClient/ChatClient.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/Chat-Application/ChatClient/ChatClient.csproj",
         "projectName": "ChatClient",
-        "projectPath": "/Users/mac/Desktop/ChatApplication/ChatClient/ChatClient.csproj",
+        "projectPath": "/Users/mac/Desktop/Chat-Application/ChatClient/ChatClient.csproj",
         "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/Desktop/ChatApplication/ChatClient/obj/",
+        "outputPath": "/Users/mac/Desktop/Chat-Application/ChatClient/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/mac/.nuget/NuGet/NuGet.Config"

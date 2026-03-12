@@ -3,21 +3,22 @@ using Avalonia.Media;
 using System;
 using System.Globalization;
 
-namespace ChatClient;
-
-public class StatusColorConverter : IValueConverter
+namespace ChatClient.Converters // သင့် Project ရဲ့ Namespace အတိုင်း ပြောင်းပေးပါ
 {
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public class StatusColorConverter : IValueConverter
     {
-        if (value is bool isOnline)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return isOnline ? Brushes.Green : Brushes.Gray;
+            if (value is bool isOnline && isOnline)
+            {
+                return Brushes.Green; // Online ဆိုရင် အစိမ်း
+            }
+            return Brushes.Gray; // Offline ဆိုရင် မီးခိုးရောင်
         }
-        return Brushes.Gray;
-    }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

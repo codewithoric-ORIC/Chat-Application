@@ -15,14 +15,14 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ChatClient
-build_property.ProjectDir = /Users/mac/Desktop/ChatApplication/ChatClient/
+build_property.ProjectDir = /Users/mac/Desktop/Chat-Application/ChatClient/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[/Users/mac/Desktop/ChatApplication/ChatClient/App.axaml]
+[/Users/mac/Desktop/Chat-Application/ChatClient/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[/Users/mac/Desktop/ChatApplication/ChatClient/Views/MainWindow.axaml]
+[/Users/mac/Desktop/Chat-Application/ChatClient/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
